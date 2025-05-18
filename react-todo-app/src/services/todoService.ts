@@ -20,7 +20,7 @@ export const todoService = {
   async updateTodo(id: number, todoData: UpdateTodoPayload): Promise<Todo> {
     const response = await api.put<Todo>(`/todos/${id}`, {
       ...todoData,
-      completed: typeof todoData.completed === 'number' ? todoData.completed : undefined,
+      completed: todoData.completed ?? 0,
     });
     return response.data;
   },

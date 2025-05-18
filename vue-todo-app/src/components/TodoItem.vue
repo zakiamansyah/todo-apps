@@ -7,6 +7,8 @@ const props = defineProps<{
   todo: Todo;
 }>();
 
+const emit = defineEmits(['updated']);
+
 const todosStore = useTodosStore();
 
 const isEditing = ref(false);
@@ -17,13 +19,13 @@ const loading = ref(false);
 const localTodo = ref<Todo>({ ...props.todo });
 
 watch(
-  () => todosStore.todoById(localTodo.value.id),
-  (updatedTodo) => {
-    if (updatedTodo) {
-      localTodo.value = { ...updatedTodo };
-    }
+  () => props.todo,
+  (newTodo) => {
+    localTodo.value = { ...newTodo };
+    editTitle.value = newTodo.title;
+    editDescription.value = newTodo.description;
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 const statusClasses = computed(() => {
@@ -40,6 +42,7 @@ async function toggleStatus() {
   loading.value = true;
   try {
     await todosStore.toggleTodoStatus(localTodo.value.id);
+    emit('updated');
   } finally {
     loading.value = false;
   }
@@ -51,6 +54,7 @@ async function deleteTodo() {
   loading.value = true;
   try {
     await todosStore.deleteTodo(localTodo.value.id);
+    emit('updated');
   } finally {
     loading.value = false;
   }
@@ -71,7 +75,13 @@ async function saveEdit() {
       title: editTitle.value,
       description: editDescription.value
     });
+
+    localTodo.value.title = editTitle.value;
+    localTodo.value.description = editDescription.value;
+
     isEditing.value = false;
+
+    emit('updated');
   } finally {
     loading.value = false;
   }

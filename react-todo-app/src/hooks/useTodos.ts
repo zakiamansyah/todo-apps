@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Todo } from '../types';
@@ -34,24 +34,32 @@ export const useTodos = () => {
     }
   };
 
-  const filterTodos = () => {
+  const filterTodosWith = useCallback((source: Todo[] = todos) => {
     switch (filter) {
       case 'active':
-        setFilteredTodos(todos.filter(todo => !todo.completed));
+        setFilteredTodos(source.filter(todo => !todo.completed));
         break;
       case 'completed':
-        setFilteredTodos(todos.filter(todo => todo.completed));
+        setFilteredTodos(source.filter(todo => todo.completed));
         break;
       default:
-        setFilteredTodos(todos);
+        setFilteredTodos(source);
     }
-  };
+  }, [filter, todos]);
+
+  useEffect(() => {
+    filterTodosWith();
+  }, [filter, todos, filterTodosWith]);
 
   const addTodo = async (title: string, description: string) => {
     setIsSubmitting(true);
     try {
       const newTodo = await todoService.createTodo({ title, description });
-      setTodos(prevTodos => [...prevTodos, newTodo]);
+      setTodos(prevTodos => {
+        const updatedTodos = [...prevTodos, newTodo];
+        filterTodosWith(updatedTodos);
+        return updatedTodos;
+      });
       toast.success('Todo added successfully');
     } catch (error) {
       handleError(error, 'Failed to add todo');
@@ -62,22 +70,28 @@ export const useTodos = () => {
 
   const toggleTodoComplete = async (todo: Todo) => {
     const optimisticTodo = { ...todo, completed: todo.completed ? 0 : 1 };
-    setTodos(prevTodos =>
-      prevTodos.map(t => t.id === todo.id ? optimisticTodo : t)
-    );
+    setTodos(prevTodos => {
+      const updatedTodos = prevTodos.map(t => t.id === todo.id ? optimisticTodo : t);
+      filterTodosWith(updatedTodos);
+      return updatedTodos;
+    });
 
     try {
       const updatedTodo = await todoService.toggleTodoCompletion(todo);
-      setTodos(prevTodos =>
-        prevTodos.map(t => t.id === updatedTodo.id ? updatedTodo : t)
-      );
+      setTodos(prevTodos => {
+        const updatedTodos = prevTodos.map(t => t.id === updatedTodo.id ? updatedTodo : t);
+        filterTodosWith(updatedTodos);
+        return updatedTodos;
+      });
       toast.success(
         updatedTodo.completed ? 'Todo marked as completed' : 'Todo marked as incomplete'
       );
     } catch (error) {
-      setTodos(prevTodos =>
-        prevTodos.map(t => t.id === todo.id ? todo : t)
-      );
+      setTodos(prevTodos => {
+        const revertedTodos = prevTodos.map(t => t.id === todo.id ? todo : t);
+        filterTodosWith(revertedTodos);
+        return revertedTodos;
+      });
       handleError(error, 'Failed to update todo status');
     }
   };
@@ -87,20 +101,26 @@ export const useTodos = () => {
     if (!todoToUpdate) return;
 
     const optimisticTodo = { ...todoToUpdate, title, description };
-    setTodos(prevTodos =>
-      prevTodos.map(t => t.id === id ? optimisticTodo : t)
-    );
+    setTodos(prevTodos => {
+      const updatedTodos = prevTodos.map(t => t.id === id ? optimisticTodo : t);
+      filterTodosWith(updatedTodos);
+      return updatedTodos;
+    });
 
     try {
       const updatedTodo = await todoService.updateTodo(id, { title, description });
-      setTodos(prevTodos =>
-        prevTodos.map(t => t.id === updatedTodo.id ? updatedTodo : t)
-      );
+      setTodos(prevTodos => {
+        const updatedTodos = prevTodos.map(t => t.id === updatedTodo.id ? updatedTodo : t);
+        filterTodosWith(updatedTodos);
+        return updatedTodos;
+      });
       toast.success('Todo updated successfully');
     } catch (error) {
-      setTodos(prevTodos =>
-        prevTodos.map(t => t.id === id ? todoToUpdate : t)
-      );
+      setTodos(prevTodos => {
+        const revertedTodos = prevTodos.map(t => t.id === id ? todoToUpdate : t);
+        filterTodosWith(revertedTodos);
+        return revertedTodos;
+      });
       handleError(error, 'Failed to update todo');
     }
   };
@@ -109,25 +129,29 @@ export const useTodos = () => {
     const todoToDelete = todos.find(t => t.id === id);
     if (!todoToDelete) return;
 
-    setTodos(prevTodos => prevTodos.filter(t => t.id !== id));
+    setTodos(prevTodos => {
+      const updatedTodos = prevTodos.filter(t => t.id !== id);
+      filterTodosWith(updatedTodos);
+      return updatedTodos;
+    });
 
     try {
       await todoService.deleteTodo(id);
       toast.success('Todo deleted successfully');
     } catch (error) {
-      setTodos(prevTodos => [...prevTodos, todoToDelete]);
+      setTodos(prevTodos => {
+        const revertedTodos = [...prevTodos, todoToDelete];
+        filterTodosWith(revertedTodos);
+        return revertedTodos;
+      });
       handleError(error, 'Failed to delete todo');
     }
   };
 
-  useEffect(() => {
-    filterTodos();
-  }, [filter, todos]);
-
   const stats = {
     total: todos.length,
     completed: todos.filter(todo => todo.completed).length,
-    active: todos.length - todos.filter(todo => todo.completed).length,
+    active: todos.filter(todo => !todo.completed).length,
   };
 
   return {
