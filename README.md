@@ -1,77 +1,88 @@
-# React Todo App
+# Vue Todo App
 
-A modern Todo application built with React, TypeScript, Vite, and Tailwind CSS.
+A beautiful Todo application built with **Vue 3**, **TypeScript**, **Pinia**, **Vue Router**, **Tailwind CSS**, and **Vite**.
 
 ## Features
 
-- User authentication (login/logout)
-- Add, edit, delete, and filter todos
-- Mark todos as completed/incomplete
-- Responsive UI with light/dark mode
-- Toast notifications for actions
+- User authentication (login)
+- Create, read, update, and delete todos
+- Mark todos as complete/incomplete
+- Filter todos by status (all, completed, incomplete)
+- Responsive and modern UI with Tailwind CSS
+- Light/Dark theme switcher
+- Toast notifications for feedback
 
 ## Project Structure
 
-- `src/components/` – UI components (Todo list, Todo item, Buttons, etc.)
-- `src/hooks/` – Custom React hooks (e.g., `useTodos` for todo logic)
-- `src/pages/` – Page components (Login, Todos, NotFound)
-- `src/services/` – API service logic
-- `src/types/` – TypeScript type definitions
-- `src/contexts/` – Context providers (auth, theme)
-- `src/routes/` – Routing setup
+```
+├── public/                # Static assets
+├── src/
+│   ├── assets/            # Images and icons
+│   ├── components/        # Reusable Vue components
+│   ├── layouts/           # Layout components
+│   ├── pages/             # Route-based pages
+│   ├── router/            # Vue Router setup
+│   ├── services/          # API service modules
+│   ├── stores/            # Pinia stores (state management)
+│   ├── types/             # TypeScript type definitions
+│   ├── App.vue            # Main app component
+│   ├── main.ts            # App entry point
+│   └── style.css          # Tailwind and global styles
+├── index.html             # App HTML entry
+├── package.json           # Project metadata and scripts
+├── tailwind.config.js     # Tailwind CSS config
+├── tsconfig*.json         # TypeScript configs
+└── vite.config.ts         # Vite config
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- [npm](https://www.npmjs.com/)
+- [Node.js](https://nodejs.org/) (v16+ recommended)
+- [npm](https://www.npmjs.com/) (comes with Node.js)
 
-### Installation
+## Installation
 
 1. **Clone the repository:**
+
    ```sh
-   git clone git@github.com:zakiamansyah/react-todo-app.git
-   cd react-todo-app
+   git clone https://github.com/zakiamansyah/vue-todo-app.git
+   cd vue-todo-app
    ```
 
 2. **Install dependencies:**
+
    ```sh
    npm install
    ```
 
-### Running the App
+3. **Run the development server:**
 
-Start the development server:
+   ```sh
+   npm run dev
+   ```
 
-```sh
-npm run dev
-```
+   The app will be available at [http://localhost:5173](http://localhost:5173).
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+4. **Build for production:**
 
-### Building for Production
+   ```sh
+   npm run build
+   ```
 
-```sh
-npm run build
-```
+5. **Preview the production build:**
 
-Preview the production build:
+   ```sh
+   npm run preview
+   ```
 
-```sh
-npm run preview
-```
+## Environment
 
-### Linting
-
-```sh
-npm run lint
-```
+- The app uses a remote API endpoint (see [`src/services/api.ts`](src/services/api.ts)).
+- No additional environment variables are required for local development.
 
 ## Customization
 
-- Tailwind CSS config: `tailwind.config.js`
-- Theme and authentication logic: `src/contexts/`
-- Todo logic: `src/hooks/useTodos.ts`
-
----
+- **Theme**: Use the theme switcher in the header to toggle light/dark mode.
+- **API**: To change the API base URL, edit the `baseURL` in [`src/services/api.ts`](src/services/api.ts).

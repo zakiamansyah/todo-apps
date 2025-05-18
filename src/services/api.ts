@@ -1,21 +1,24 @@
-import axios from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios';
 
-const api = axios.create({
+let onUnauthorizedLogout: (() => void) | null = null;
+
+export function setUnauthorizedLogoutHandler(handler: () => void) {
+  onUnauthorizedLogout = handler;
+}
+
+const apiClient: AxiosInstance = axios.create({
   baseURL: 'https://squirrel-fitting-wasp.ngrok-free.app/test-todo-api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-api.interceptors.request.use(
-  (config) => {
+apiClient.interceptors.request.use(
+  (config: AxiosRequestConfig) => {
     const token = localStorage.getItem('token');
-    console.log('Token:', token);
 
-    if (token) {
-      config.headers.Authorization = token.startsWith('Bearer')
-        ? token
-        : `Bearer ${token}`;
+    if (token && config.headers) {
+      config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     }
 
     return config;
@@ -23,17 +26,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+  (error: AxiosError) => {
+    if (error.response?.status === 401 && onUnauthorizedLogout) {
+      onUnauthorizedLogout();
     }
 
     return Promise.reject(error);
   }
 );
 
-export default api;
+export default apiClient;
