@@ -18,45 +18,23 @@ git clone https://github.com/zakiamansyah/todo-apps
 cd todo-apps
 ```
 
-### 2. Checkout to a Branch
-
-Before installing dependencies, switch to the desired branch (replace `branch-name` with your target branch):
-
-```sh
-git checkout branch-name
-```
-
-### 3. Install Dependencies
+### 2. Install Dependencies & Running the Apps
 
 Each app manages its own dependencies. Navigate into the desired app directory and install:
 
 #### For React App
 
 ```sh
-git checkout react-todo-app
+cd react-todo-app
 npm install
+npm run dev
 ```
 
 #### For Vue App
 
 ```sh
-git checkout vue-todo-app
+cd vue-todo-app
 npm install
-```
-
-### 4. Running the Apps
-
-Each app can be started independently.
-
-#### React App
-
-```sh
-npm run dev
-```
-
-#### Vue App
-
-```sh
 npm run dev
 ```
 
